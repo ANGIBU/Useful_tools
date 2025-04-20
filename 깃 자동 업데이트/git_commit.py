@@ -1,5 +1,12 @@
-# git_sync.py
-# GitHub 저장소에 자동으로 커밋/푸시하는 윈도우 서비스입니다.
+"""
+Git 자동 동기화 서비스 (Git Auto Sync)
+
+✔️ 커밋 메시지는 아래와 같은 형식입니다:
+    Automated Commit Update at 2025-04-20 14:30:12
+
+📌 아래 위치에서 경로와 URL, 브랜치 양식을 알맞게 수정 후 사용하세요!:
+    ▶ 184줄, 222줄
+"""
 # ─────────────────────────────────────────────────────
 # 사용 전 필수 확인 사항:
 # 1. 해당 GitHub 저장소에 push 권한이 있는 계정이어야 합니다.
@@ -10,9 +17,6 @@
 # 4. 이 코드는 원격 변경 사항을 무시하고 로컬 변경만 푸시합니다 (force push).
 # ─────────────────────────────────────────────────────
 # run_git_sync.py 또는 시작 프로그램 등록으로 자동 실행 가능합니다.
-# ─────────────────────────────────────────────────────
-# 아래 주석이 적힌 부분은 전부 수정을 하신 후 양식을 확인한 다음 실행을 하시면 됩니다.
-
 
 import os
 import time
@@ -76,22 +80,18 @@ class GitAutoSync:
         self.logger.addHandler(console_handler)
 
     def ensure_branch(self):
-        """현재 브랜치를 확인하고 필요시 대상 브랜치로 전환"""
         try:
             current_branch = self.repo.active_branch.name
             self.logger.info(f"Current branch: {current_branch}")
-            
             local_branches = [b.name for b in self.repo.branches]
-            self.logger.info(f"Local branches: {local_branches}")
-            
+
             if self.branch not in local_branches:
                 self.logger.info(f"Creating new local branch '{self.branch}'")
                 self.repo.git.checkout("-b", self.branch)
-                self.logger.info(f"Created and checked out branch '{self.branch}'")
             elif current_branch != self.branch:
                 self.repo.git.checkout(self.branch)
                 self.logger.info(f"Checked out branch '{self.branch}'")
-                
+
             return True
         except Exception as e:
             self.logger.error(f"Error ensuring branch: {str(e)}")
@@ -99,49 +99,44 @@ class GitAutoSync:
             return False
 
     def force_push(self):
-        """로컬 파일만 강제로 커밋하고 푸시 (원격 변경사항 무시)"""
         try:
             if not self.ensure_branch():
                 self.logger.error("Failed to ensure correct branch, skipping push")
                 return False
-            
+
             self.repo.git.add(".")
-            
-            commit_message = f"Initial sync: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+
+            commit_message = f"chore: Automated Commit Update at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             self.repo.git.commit("-m", commit_message, "--allow-empty")
             self.logger.info(f"Created commit: {commit_message}")
-            
+
             try:
                 self.logger.info(f"Force pushing to origin/{self.branch}...")
                 origin = self.repo.remote("origin")
                 push_info = origin.push(self.branch, force=True)
                 for info in push_info:
                     self.logger.info(f"Push result: {info.summary}")
-                self.logger.info("Successfully pushed initial commit")
                 return True
             except Exception as e:
                 self.logger.error(f"Push failed: {str(e)}")
                 self.logger.error(traceback.format_exc())
                 return False
-                
+
         except Exception as e:
             self.logger.error(f"Error during force push: {str(e)}")
             self.logger.error(traceback.format_exc())
             return False
 
     def sync(self):
-        """일반 동기화 - 로컬 변경사항만 커밋 및 푸시"""
         try:
             if not self.ensure_branch():
                 self.logger.error("Failed to ensure correct branch, skipping sync")
                 return
 
             self.repo.git.add(".")
-            
+
             if self.repo.is_dirty() or len(self.repo.untracked_files) > 0:
-                commit_message = (
-                    f"Auto sync: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-                )
+                commit_message = f"chore: automated commit at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 self.repo.index.commit(commit_message)
 
                 try:
@@ -150,7 +145,6 @@ class GitAutoSync:
                     push_info = origin.push(self.branch, force=True)
                     for info in push_info:
                         self.logger.info(f"Push result: {info.summary}")
-                    self.logger.info("Successfully pushed changes")
                 except Exception as e:
                     self.logger.error(f"Push failed: {str(e)}")
                     self.logger.error(traceback.format_exc())
@@ -185,49 +179,37 @@ class GitAutoSyncService(win32serviceutil.ServiceFramework):
             (self._svc_name_, "")
         )
         self.main()
+#############################################################################
 
-    def main(self):
-        # 설정 값
-        repo_path = r"파일 경로"  # 푸시할 파일 위치 (알맞게 수정)
-        remote_url = "깃허브 주소"  # 푸시할 깃허브 주소 (알맞게 수정)
-        branch = "깃허브 브랜치"  # 자신의 브랜치 (알맞게 수정)
+    def main(self): # 이곳에서 양식을 수정하여 주세요
+        repo_path = r"파일 경로"
+        remote_url = "깃허브 주소"
+        branch = "깃허브 브랜치"
         
+#############################################################################
         try:
             git_sync = GitAutoSync(repo_path, remote_url, branch)
-            
-            servicemanager.LogMsg(
-                servicemanager.EVENTLOG_INFORMATION_TYPE,
-                0,
-                ("초기 푸시 시작", "")
-            )
-            
+
+            servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE, 0, ("초기 푸시 시작", ""))
+
             if git_sync.force_push():
-                servicemanager.LogMsg(
-                    servicemanager.EVENTLOG_INFORMATION_TYPE,
-                    0,
-                    ("초기 푸시 완료", "")
-                )
+                servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE, 0, ("초기 푸시 완료", ""))
             else:
-                servicemanager.LogMsg(
-                    servicemanager.EVENTLOG_WARNING_TYPE,
-                    0,
-                    ("초기 푸시 실패", "")
-                )
-            
-            # 10분마다 동기화 설정 (업데이트 주기의 수정을 원할 경우 수정)
+                servicemanager.LogMsg(servicemanager.EVENTLOG_WARNING_TYPE, 0, ("초기 푸시 실패", ""))
+
             schedule.every(10).minutes.do(git_sync.sync)
-            
+
             servicemanager.LogMsg(
                 servicemanager.EVENTLOG_INFORMATION_TYPE,
                 0,
                 (f"Git 자동 동기화가 시작되었습니다. 10분마다 {branch} 브랜치를 동기화합니다.", "")
             )
-            
+
             while not self.stop_requested:
                 schedule.run_pending()
                 if win32event.WaitForSingleObject(self.hWaitStop, 1000) == win32event.WAIT_OBJECT_0:
                     break
-            
+
         except Exception as e:
             servicemanager.LogMsg(
                 servicemanager.EVENTLOG_ERROR_TYPE,
@@ -235,35 +217,36 @@ class GitAutoSyncService(win32serviceutil.ServiceFramework):
                 (f"서비스 오류: {str(e)}", "")
             )
 
+#############################################################################
 
-# 설정 값값
-def run_as_script():
-    """일반 스크립트로 실행할 때 호출되는 함수"""
-    repo_path = r"C:\Users\facec\Desktop\smart_city"  # 푸시할 파일 위치 (알맞게 수정)
-    remote_url = "https://github.com/junhyuk000/smart_city.git"  # 푸시할 깃허브 주소 (알맞게 수정)
-    branch = "gb"  # 사용할 브랜치 (알맞게 수정)
+def run_as_script(): # 이곳에서 양식을 수정하여 주세요
+    repo_path = r"파일 경로"
+    remote_url = "깃허브 주소"
+    branch = "깃허브 브랜치"
+    
+#############################################################################
 
     try:
         git_sync = GitAutoSync(repo_path, remote_url, branch)
-        
+
         print("프로그램 시작 시 즉시 푸시 중... (원격 변경사항을 무시하고 로컬 파일만 푸시합니다)")
         if git_sync.force_push():
             print("초기 푸시 완료!")
         else:
             print("초기 푸시 실패. 로그를 확인하세요.")
-        
+
         if len(sys.argv) > 1 and sys.argv[1] == "--background":
             print(f"Git 자동 동기화가 시작되었습니다. 10분마다 {branch} 브랜치를 동기화합니다.")
             print("※ 주의: 원격 변경사항을 가져오지 않고 로컬 파일만 푸시합니다.")
             print("프로그램을 종료하려면 Ctrl+C를 누르세요.")
-            
+
             schedule.every(10).minutes.do(git_sync.sync)
             while True:
                 schedule.run_pending()
                 time.sleep(1)
         else:
             schedule.every(10).minutes.do(git_sync.sync)
-            
+
             print(f"Git 자동 동기화가 설정되었습니다. 10분마다 {branch} 브랜치를 동기화합니다.")
             print("※ 주의: 원격 변경사항을 가져오지 않고 로컬 파일만 푸시합니다.")
             print("프로그램이 백그라운드에서 실행됩니다. 이 창은 3초 후 자동으로 닫힙니다.")

@@ -1,3 +1,3 @@
 @echo off
 echo 자동 동기화를 시작합니다...
-python "C:\Users\facec\Desktop\tool-main\git_sync.py"
+python "파이썬 경로를 입력해주세요"
