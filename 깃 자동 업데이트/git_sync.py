@@ -1,7 +1,18 @@
 # git_sync.py
-# 깃허브에 자동으로 push하는 윈도우 서비스
-# 설정값을 잘 확인하여 사용하세요
-# run_git_sync.py = 경로를 수정하여 시작프로그램으로 설정 가능
+# GitHub 저장소에 자동으로 커밋/푸시하는 윈도우 서비스입니다.
+# ─────────────────────────────────────────────────────
+# 사용 전 필수 확인 사항:
+# 1. 해당 GitHub 저장소에 push 권한이 있는 계정이어야 합니다.
+#    - 저장소 소유자로부터 Collaborator(협업자)로 초대받아야 합니다.
+#    - 또는 본인 저장소에 연결하여 사용하세요.
+# 2. 원격 저장소 URL(remote_url)을 본인에게 맞게 수정하세요.
+# 3. 인증은 HTTPS(PAT 필요) 또는 SSH 방식이 가능합니다.
+# 4. 이 코드는 원격 변경 사항을 무시하고 로컬 변경만 푸시합니다 (force push).
+# ─────────────────────────────────────────────────────
+# run_git_sync.py 또는 시작 프로그램 등록으로 자동 실행 가능합니다.
+# ─────────────────────────────────────────────────────
+# 아래 주석이 적힌 부분은 전부 수정을 하신 후 양식을 확인한 다음 실행을 하시면 됩니다.
+
 
 import os
 import time
@@ -177,9 +188,9 @@ class GitAutoSyncService(win32serviceutil.ServiceFramework):
 
     def main(self):
         # 설정 값
-        repo_path = r"C:\Users\facec\Desktop\smart_city"  # 푸시할 파일 위치 (알맞게 수정)
-        remote_url = "https://github.com/junhyuk000/smart_city.git"  # 푸시할 깃허브 주소 (알맞게 수정)
-        branch = "gb"  # 사용할 브랜치 (알맞게 수정)
+        repo_path = r"파일 경로"  # 푸시할 파일 위치 (알맞게 수정)
+        remote_url = "깃허브 주소"  # 푸시할 깃허브 주소 (알맞게 수정)
+        branch = "깃허브 브랜치"  # 자신의 브랜치 (알맞게 수정)
         
         try:
             git_sync = GitAutoSync(repo_path, remote_url, branch)
