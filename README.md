@@ -1,4 +1,5 @@
 <img src="https://www.spriters-resource.com/resources/sheet_icons/168/171517.gif?updated=1648938576" alt="도트 커비 5" width="100"/>
+
 ## 📁 `깃 자동 업데이트 (git auto update)`
 
 ### 📌 목적  
