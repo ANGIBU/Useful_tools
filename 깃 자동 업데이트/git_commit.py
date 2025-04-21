@@ -1,5 +1,5 @@
 """
-Git 자동 동기화 서비스 (Git Auto Sync)
+Git 자동 동기화 서비스
 
 ✔️ 커밋 메시지는 아래와 같은 형식입니다:
     Automated Commit Update at 2025-04-20 14:30:12
