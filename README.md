@@ -1,4 +1,5 @@
-## 📁 `깃 자동 업데이트 (git auto update)` <img src="https://www.spriters-resource.com/resources/sheet_icons/168/171517.gif?updated=1648938576" alt="도트 커비 5" width="100"/>
+<img src="https://www.spriters-resource.com/resources/sheet_icons/168/171517.gif?updated=1648938576" alt="도트 커비 5" width="100"/>
+## 📁 `깃 자동 업데이트 (git auto update)`
 
 ### 📌 목적  
 로컬 Git 저장소의 변경 사항을 자동 커밋 및 푸시하여 백업과 협업을 간편하게 만듭니다.
