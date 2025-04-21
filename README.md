@@ -56,3 +56,62 @@
 - 크기 기준 정렬 분배 알고리즘 사용
 - 진행률 출력 및 압축 후 폴더 삭제 여부 선택 가능
 
+
+---------------------------------------------------------------------------
+
+
+## 📁 `Git Auto Update (git auto update)`
+
+### 📌 Purpose  
+Automatically commit and push changes to a local Git repository, making backups and collaboration easier.
+
+### 📄 Files Included  
+- `git_commit.py`  
+  - Detects changed files and automatically commits them.  
+  - Commit message format: `Automated Commit Update at YYYY-MM-DD HH:MM:SS`
+
+- `git_push.py`  
+  - Force pushes the committed content to a specified remote branch.
+
+- `run_automate.bat`  
+  - A batch file that runs the above two scripts to start the automation.  
+  - Can be registered in Windows startup programs for automatic execution.
+
+### ⚙️ Features
+- Uses `GitPython`, `pywin32`, and `schedule` libraries  
+- Automatically runs every 10 minutes  
+- Supports console and log file output
+
+---
+
+## 📁 `Organize Videos (organize videos)`
+
+### 📌 Purpose  
+Organizes video files into folders by creation/modification date in `YYYY-MM` format and compresses each into ZIP files.
+
+### 📄 Files Included  
+- `organize_videos.py`  
+  - Moves and organizes video files into year/month folders.  
+  - Compresses each folder into ZIP files.
+
+### ⚙️ Features
+- Supported extensions: `.mp4`, `.avi`, `.mov`, `.mkv`, etc.  
+- Creates folders based on dates (`2024-04`, `2024-05`, ...)  
+- Option to delete the original files after organizing
+
+---
+
+## 📁 `Split Images by Size (split images by size)`
+
+### 📌 Purpose  
+Splits image files into folders by a specified size and compresses each folder into a ZIP file.
+
+### 📄 Files Included  
+- `filephoto.py`  
+  - Analyzes image files and sorts them by size  
+  - Automatically compresses them into ZIP files.
+
+### ⚙️ Features
+- Supported extensions: `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`, `.tiff`, `.webp`  
+- Uses size-based sorting algorithm  
+- Option to display progress and delete folders after compression
