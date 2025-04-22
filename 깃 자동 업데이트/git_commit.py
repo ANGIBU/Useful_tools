@@ -109,7 +109,7 @@ class GitAutoSync:
 
             self.repo.git.add(".")
 
-            commit_message = f"chore: Automated Commit Update at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            commit_message = f"Automated Commit Update at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             self.repo.git.commit("-m", commit_message, "--allow-empty")
             self.logger.info(f"Created commit: {commit_message}")
 
