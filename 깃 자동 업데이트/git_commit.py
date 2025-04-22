@@ -2,7 +2,7 @@
 Git 자동 동기화 서비스
 
 ✔️ 커밋 메시지는 아래와 같은 형식입니다:
-    Automated Commit Update at 2025-04-20 14:30:12
+    Automated Commit Update at (업데이트 된 시간)
 
 📌 아래 위치에서 경로와 URL, 브랜치 양식을 알맞게 수정 후 사용하세요!:
     ▶ 200줄
