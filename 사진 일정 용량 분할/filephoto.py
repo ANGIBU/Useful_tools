@@ -6,8 +6,8 @@ import zipfile
 from pathlib import Path
 
 # 여기에 경로를 입력하세요
-source_dir = r"C:\Users\facec\Pictures\Screenshots"  # 원본 이미지가 있는 디렉토리 경로
-output_dir = r"C:\Users\facec\Pictures"    # 분할된 이미지를 저장할 디렉토리 경로
+source_dir = r"이미지 경로"  # 원본 이미지가 있는 디렉토리 경로
+output_dir = r"저장할 경로"    # 분할된 이미지를 저장할 디렉토리 경로
 max_size_mb = 512                # 폴더당 최대 크기(MB)
 
 def get_all_image_files(source_dir):

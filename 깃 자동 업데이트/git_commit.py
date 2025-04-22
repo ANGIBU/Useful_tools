@@ -5,7 +5,7 @@ Git 자동 동기화 서비스
     Automated Commit Update at 2025-04-20 14:30:12
 
 📌 아래 위치에서 경로와 URL, 브랜치 양식을 알맞게 수정 후 사용하세요!:
-    ▶ 184줄, 222줄
+    ▶ 187줄, 226줄
 """
 # ─────────────────────────────────────────────────────
 # 사용 전 필수 확인 사항:
@@ -34,6 +34,7 @@ import socket
 import win32event
 import win32service
 import win32serviceutil
+import subprocess
 
 
 class GitAutoSync:
@@ -209,6 +210,7 @@ class GitAutoSyncService(win32serviceutil.ServiceFramework):
 
             while not self.stop_requested:
                 schedule.run_pending()
+                time.sleep(1)  # 1초마다 스케줄러 확인
                 if win32event.WaitForSingleObject(self.hWaitStop, 1000) == win32event.WAIT_OBJECT_0:
                     break
 
@@ -237,21 +239,38 @@ def run_as_script(): # 이곳에서 양식을 수정하여 주세요
         else:
             print("초기 푸시 실패. 로그를 확인하세요.")
 
-        if len(sys.argv) > 1 and sys.argv[1] == "--background":
+        # 스케줄러 설정
+        schedule.every(10).minutes.do(git_sync.sync)
+        
+        # 동작 모드 결정
+        is_background = "--background" in sys.argv
+        is_silent = "--silent" in sys.argv
+        
+        if is_background or is_silent:
+            # 백그라운드 모드로 계속 실행
             print(f"Git 자동 동기화가 시작되었습니다. 10분마다 {branch} 브랜치를 동기화합니다.")
             print("※ 주의: 원격 변경사항을 가져오지 않고 로컬 파일만 푸시합니다.")
             print("프로그램을 종료하려면 Ctrl+C를 누르세요.")
-
-            schedule.every(10).minutes.do(git_sync.sync)
-            while True:
-                schedule.run_pending()
-                time.sleep(1)
+            
+            try:
+                while True:
+                    schedule.run_pending()
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                print("\n프로그램을 종료합니다...")
+                sys.exit(0)
         else:
-            schedule.every(10).minutes.do(git_sync.sync)
-
+            # 새 프로세스를 백그라운드로 시작
             print(f"Git 자동 동기화가 설정되었습니다. 10분마다 {branch} 브랜치를 동기화합니다.")
             print("※ 주의: 원격 변경사항을 가져오지 않고 로컬 파일만 푸시합니다.")
             print("프로그램이 백그라운드에서 실행됩니다. 이 창은 3초 후 자동으로 닫힙니다.")
+            
+            # 현재 스크립트를 백그라운드 모드로 다시 실행
+            script_path = sys.argv[0]
+            subprocess.Popen([sys.executable, script_path, "--background"], 
+                            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+            
+            # 3초 후 현재 창 종료
             time.sleep(3)
             sys.exit(0)
 
@@ -260,6 +279,8 @@ def run_as_script(): # 이곳에서 양식을 수정하여 주세요
         sys.exit(0)
     except Exception as e:
         print(f"치명적 오류 발생: {str(e)}")
+        print(traceback.format_exc())  # 오류 상세 정보 출력
+        print("10초 후 프로그램이 종료됩니다...")
         time.sleep(10)
         sys.exit(1)
 
