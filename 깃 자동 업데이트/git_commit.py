@@ -2,10 +2,10 @@
 Git 자동 동기화 서비스
 
 ✔️ 커밋 메시지는 아래와 같은 형식입니다:
-    Automated Commit Update at (업데이트 된 시간)
+    Automated Commit Update at (업데이트 된 시간))
 
 📌 아래 위치에서 경로와 URL, 브랜치 양식을 알맞게 수정 후 사용하세요!:
-    ▶ 200줄
+    ▶ 205줄, 260줄
 """
 # ─────────────────────────────────────────────────────
 # 사용 전 필수 확인 사항:
@@ -17,6 +17,8 @@ Git 자동 동기화 서비스
 # 4. 이 코드는 원격 변경 사항을 무시하고 로컬 변경만 푸시합니다 (force push).
 # ─────────────────────────────────────────────────────
 # 라이브러리 설치 : pip install gitpython schedule pywin32 <-- 복사해서 cmd에 붙여넣으세요
+# Git_Automate.vbs를 시작프로그램에 등록하면 부팅 시 자동 실행 됩니다.
+# Git_Automate.vbs는 바로가기 생성 후 시작프로그램에 등록하세요! --바로가기 생성 중요!--
 # ─────────────────────────────────────────────────────
 
 import os
@@ -33,7 +35,10 @@ import socket
 import win32event
 import win32service
 import win32serviceutil
+import subprocess
 
+# bat 파일에서 실행했는지 확인하기 위한 플래그
+from_bat = "--from-bat" in sys.argv
 
 class GitAutoSync:
     def __init__(self, repo_path, remote_url, branch="gb"):
@@ -234,11 +239,34 @@ class GitAutoSyncService(win32serviceutil.ServiceFramework):
                 (f"서비스 오류: {str(e)}", "")
             )
 
+def restart_as_background():
+    """새 프로세스로 자신을 재시작하고 현재 프로세스는 3초 후 종료"""
+    script_path = os.path.abspath(sys.argv[0])
+    
+    # --from-bat 플래그를 제거하고 --background 플래그 추가
+    args = [arg for arg in sys.argv[1:] if arg != "--from-bat"]
+    if "--background" not in args:
+        args.append("--background")
+    
+    # 새 프로세스 시작
+    subprocess.Popen([sys.executable, script_path] + args)
+    
+    # 현재 프로세스는 3초 후 종료
+    print("\n프로그램이 백그라운드에서 실행됩니다. 이 창은 3초 후 자동으로 닫힙니다.")
+    time.sleep(3)
+    sys.exit(0)
+#######################################################################
+
 def run_foreground():
-    # 실제 작업을 수행하는 단일 함수
-    repo_path = r"C:\Users\facec\Desktop\LIVON"
-    remote_url = "https://github.com/Jinyechan/LIVON-PROJECT"
-    branch = "gibu"
+    repo_path = r"파일 경로"
+    remote_url = "깃허브 주소"
+    branch = "깃허브 브랜치"
+                
+#######################################################################
+    # bat 파일에서 실행한 경우 백그라운드로 재시작
+    if from_bat and "--background" not in sys.argv:
+        restart_as_background()
+        return
     
     try:
         git_sync = GitAutoSync(repo_path, remote_url, branch)
@@ -279,7 +307,7 @@ def run_foreground():
             while True:
                 schedule.run_pending()
                 
-                # 1분마다 한 번씩 로그 출력 (화면이 계속 움직이는 것처럼 보이게)
+                # 1분마다 한 번씩 로그 출력
                 if count % 60 == 0 and count > 0:
                     now = datetime.now()
                     next_run = schedule.next_run()
