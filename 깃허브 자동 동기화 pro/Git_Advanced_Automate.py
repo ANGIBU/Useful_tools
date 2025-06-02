@@ -11,7 +11,7 @@ Git 고급 자동 동기화 시스템 v2.0
     ✔️ Pull 및 Push 통합 관리
 
 📌 설정 위치:
-    ▶ 278줄, 334줄 - 저장소 설정
+    ▶ 545줄 - 저장소 설정
     ▶ 필요한 패키지: pip install gitpython schedule pywin32
 """
 
@@ -489,9 +489,9 @@ class GitAdvancedSyncService(win32serviceutil.ServiceFramework):
 
     def main(self):
         # ========== 서비스 설정 (여기를 수정하세요) ==========
-        repo_path = r"C:\Users\YourName\Documents\MyRepo"  # 저장소 경로
-        remote_url = "https://github.com/username/repository.git"  # GitHub URL
-        branch = "main"  # 브랜치명
+        repo_path = r"저장소 경로"  # 저장소 경로
+        remote_url = "깃허브 주소.Git"  # GitHub URL
+        branch = "브랜치명"  # 브랜치명
         # ================================================
         
         try:
@@ -544,9 +544,9 @@ def restart_as_background():
 
 def run_foreground():
     # ========== 포그라운드 실행 설정 (여기를 수정하세요) ==========
-    repo_path = r"C:\Users\YourName\Documents\MyRepo"  # 저장소 경로
-    remote_url = "https://github.com/username/repository.git"  # GitHub URL  
-    branch = "main"  # 브랜치명
+    repo_path = r"저장소 경로"  # 저장소 경로
+    remote_url = "깃허브 주소.Git"  # GitHub URL
+    branch = "브랜치명"  # 브랜치명
     # =========================================================
     
     # bat 파일에서 실행한 경우 백그라운드로 재시작

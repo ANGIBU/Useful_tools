@@ -204,7 +204,7 @@ class GitAutoSyncService(win32serviceutil.ServiceFramework):
 
     def main(self):
         repo_path = r"파일 경로"
-        remote_url = "깃허브 주소"
+        remote_url = "깃허브 주소.git"
         branch = "깃허브 브랜치"
         
 #######################################################################
@@ -259,7 +259,7 @@ def restart_as_background():
 
 def run_foreground():
     repo_path = r"파일 경로"
-    remote_url = "깃허브 주소"
+    remote_url = "깃허브 주소.git"
     branch = "깃허브 브랜치"
                 
 #######################################################################
