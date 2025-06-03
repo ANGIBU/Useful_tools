@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-# 디렉터리 정보: 이미지 파일들을 512MB 이하 크기의 폴더로 분할하고 압축하는 스크립트
+# image_splitter.py
 import os
 import shutil
 import zipfile
 from pathlib import Path
 
-# 여기에 경로를 입력하세요
-source_dir = r"이미지 경로"  # 원본 이미지가 있는 디렉토리 경로
-output_dir = r"저장할 경로"    # 분할된 이미지를 저장할 디렉토리 경로
-max_size_mb = 512                # 폴더당 최대 크기(MB)
+# Enter the paths here
+source_dir = r"image_path"      # Source directory path where original images are located
+output_dir = r"save_path"       # Directory path to save divided images
+max_size_mb = 512               # Maximum size per folder (MB)
 
 def get_all_image_files(source_dir):
     image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp'}
@@ -57,10 +57,10 @@ def copy_images(distribution):
             dest_path = os.path.join(folder, os.path.basename(file_path))
             shutil.copy2(file_path, dest_path)
             copied_files += 1
-            print(f"진행률: {copied_files}/{total_files} ({(copied_files/total_files)*100:.1f}%) - {file_path} -> {dest_path}")
+            print(f"Progress: {copied_files}/{total_files} ({(copied_files/total_files)*100:.1f}%) - {file_path} -> {dest_path}")
 
 def zip_folders(output_folders):
-    print("폴더 압축 중...")
+    print("Compressing folders...")
     for folder in output_folders:
         zip_path = f"{folder}.zip"
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -69,7 +69,7 @@ def zip_folders(output_folders):
                     file_path = os.path.join(root, file)
                     arcname = os.path.relpath(file_path, os.path.dirname(folder))
                     zipf.write(file_path, arcname)
-        print(f"압축 완료: {zip_path}")
+        print(f"Compression completed: {zip_path}")
 
 def calculate_required_folders(image_files, max_size_bytes):
     total_size = sum(size for _, size in image_files)
@@ -79,50 +79,50 @@ def calculate_required_folders(image_files, max_size_bytes):
 def main():
     max_size_bytes = max_size_mb * 1024 * 1024
     
-    print(f"소스 디렉터리: {source_dir}")
-    print(f"출력 디렉터리: {output_dir}")
-    print(f"폴더당 최대 크기: {max_size_mb}MB")
+    print(f"Source directory: {source_dir}")
+    print(f"Output directory: {output_dir}")
+    print(f"Maximum size per folder: {max_size_mb}MB")
     
     os.makedirs(output_dir, exist_ok=True)
     
-    print("이미지 파일 스캔 중...")
+    print("Scanning image files...")
     image_files = get_all_image_files(source_dir)
-    print(f"총 {len(image_files)}개의 이미지 파일을 찾았습니다.")
+    print(f"Found {len(image_files)} image files in total.")
     
     if not image_files:
-        print("이미지 파일을 찾을 수 없습니다. 종료합니다.")
+        print("No image files found. Exiting.")
         return
     
     num_folders = calculate_required_folders(image_files, max_size_bytes)
-    print(f"필요한 폴더 수: {num_folders}")
+    print(f"Number of folders required: {num_folders}")
     
     output_folders = create_output_folders(output_dir, num_folders)
     
-    print("이미지 파일 분배 계획 생성 중...")
+    print("Creating image file distribution plan...")
     distribution = distribute_images(image_files, output_folders, max_size_bytes)
     
-    print("이미지 파일 복사 중...")
+    print("Copying image files...")
     copy_images(distribution)
     
-    # 폴더를 압축파일로 만들기
+    # Create zip files from folders
     zip_folders(output_folders)
     
-    # 압축 후 폴더 정보 출력
-    print("작업 완료!")
+    # Print folder information after compression
+    print("Task completed!")
     
     for folder in output_folders:
         folder_size_bytes = sum(os.path.getsize(os.path.join(folder, f)) for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f)))
         folder_size_mb = folder_size_bytes / (1024 * 1024)
         zip_size_bytes = os.path.getsize(f"{folder}.zip") if os.path.exists(f"{folder}.zip") else 0
         zip_size_mb = zip_size_bytes / (1024 * 1024)
-        print(f"{folder}: {len(os.listdir(folder))}개 파일, {folder_size_mb:.2f}MB (압축 파일: {zip_size_mb:.2f}MB)")
+        print(f"{folder}: {len(os.listdir(folder))} files, {folder_size_mb:.2f}MB (zip file: {zip_size_mb:.2f}MB)")
     
-    # 압축 후 원본 폴더 삭제 여부 묻기
-    delete_folders = input("압축이 완료되었습니다. 원본 폴더를 삭제하시겠습니까? (y/n): ")
+    # Ask whether to delete original folders after compression
+    delete_folders = input("Compression is complete. Would you like to delete the original folders? (y/n): ")
     if delete_folders.lower() == 'y':
         for folder in output_folders:
             shutil.rmtree(folder)
-            print(f"삭제됨: {folder}")
+            print(f"Deleted: {folder}")
 
 if __name__ == "__main__":
     main()

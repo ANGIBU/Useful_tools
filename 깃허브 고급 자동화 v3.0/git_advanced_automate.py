@@ -11,9 +11,11 @@ Git 고급 자동 동기화 서비스 v3.0
 ✔️ 초기 저장소 설정 완전 자동화 (폴더 생성, clone, init)
 ✔️ 원격 변경사항 자동 pull 및 merge
 ✔️ 충돌 해결 후 자동 commit/continue
-
 📌 설정 위치: 137-151줄 (CONFIG 섹션)
+📌 경로 설정 후 vbs파일에 바로가기 형식을 생성하여 시작프로그램으로 등록하세요
 """
+
+# 
 
 import os
 import sys

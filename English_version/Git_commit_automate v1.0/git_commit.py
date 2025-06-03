@@ -1,24 +1,25 @@
+# Git_Automate_EN.py
 """
-Git 자동 동기화 서비스
+Git Automatic Sync Service
 
-✔️ 커밋 메시지는 아래와 같은 형식입니다:
-    Automated Commit Update at (업데이트 된 시간))
+✔️ Commit messages follow this format:
+    Automated Commit Update at (updated time)
 
-📌 아래 위치에서 경로와 URL, 브랜치 양식을 알맞게 수정 후 사용하세요!:
-    ▶ 205줄, 260줄
+📌 Please modify the path, URL, and branch format appropriately at the locations below before use!:
+    ▶ Lines 205, 260
 """
 # ─────────────────────────────────────────────────────
-# 사용 전 필수 확인 사항:
-# 1. 해당 GitHub 저장소에 push 권한이 있는 계정이어야 합니다.
-#    - 저장소 소유자로부터 Collaborator(협업자)로 초대받아야 합니다.
-#    - 또는 본인 저장소에 연결하여 사용하세요.
-# 2. 원격 저장소 URL(remote_url)을 본인에게 맞게 수정하세요.
-# 3. 인증은 HTTPS(PAT 필요) 또는 SSH 방식이 가능합니다.
-# 4. 이 코드는 원격 변경 사항을 무시하고 로컬 변경만 푸시합니다 (force push).
+# Essential checks before use:
+# 1. You must have push permissions to the GitHub repository.
+#    - You need to be invited as a Collaborator by the repository owner.
+#    - Or connect to your own repository.
+# 2. Modify the remote repository URL (remote_url) to match your needs.
+# 3. Authentication can be done via HTTPS (PAT required) or SSH.
+# 4. This code ignores remote changes and only pushes local changes (force push).
 # ─────────────────────────────────────────────────────
-# 라이브러리 설치 : pip install gitpython schedule pywin32 <-- 복사해서 cmd에 붙여넣으세요
-# Git_Automate.vbs를 시작프로그램에 등록하면 부팅 시 자동 실행 됩니다.
-# Git_Automate.vbs는 바로가기 생성 후 시작프로그램에 등록하세요! --바로가기 생성 중요!--
+# Library installation: pip install gitpython schedule pywin32 <-- Copy and paste this into cmd
+# Register Git_Automate.vbs in startup programs for automatic execution on boot.
+# Create a shortcut for Git_Automate.vbs and register it in startup programs!
 # ─────────────────────────────────────────────────────
 
 import os
@@ -37,7 +38,7 @@ import win32service
 import win32serviceutil
 import subprocess
 
-# bat 파일에서 실행했는지 확인하기 위한 플래그
+# Flag to check if executed from bat file
 from_bat = "--from-bat" in sys.argv
 
 class GitAutoSync:
@@ -135,7 +136,7 @@ class GitAutoSync:
 
     def sync(self):
         try:
-            print(f"스케줄된 동기화 시작: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"Scheduled sync started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             
             if not self.ensure_branch():
                 self.logger.error("Failed to ensure correct branch, skipping sync")
@@ -147,7 +148,7 @@ class GitAutoSync:
                 commit_message = f"Automated Commit Update at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 self.repo.index.commit(commit_message)
                 self.logger.info(f"Created scheduled commit: {commit_message}")
-                print(f"새 커밋 생성: {commit_message}")
+                print(f"New commit created: {commit_message}")
 
                 try:
                     self.logger.info(f"Pushing to origin/{self.branch}...")
@@ -155,32 +156,32 @@ class GitAutoSync:
                     push_info = origin.push(self.branch, force=True)
                     for info in push_info:
                         self.logger.info(f"Push result: {info.summary}")
-                        print(f"푸시 결과: {info.summary}")
+                        print(f"Push result: {info.summary}")
                 except Exception as e:
                     self.logger.error(f"Push failed: {str(e)}")
                     self.logger.error(traceback.format_exc())
-                    print(f"푸시 실패: {str(e)}")
+                    print(f"Push failed: {str(e)}")
             else:
                 self.logger.info("No changes to sync")
-                print("동기화할 변경 사항이 없습니다.")
+                print("No changes to sync.")
 
-            # 다음 실행 시간 표시
+            # Display next execution time
             next_run = schedule.next_run()
             if next_run:
-                print(f"다음 동기화 예정 시간: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
+                print(f"Next sync scheduled at: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
             else:
-                print("다음 동기화 일정이 없습니다.")
+                print("No next sync scheduled.")
 
         except Exception as e:
             self.logger.error(f"Error during sync: {str(e)}")
             self.logger.error(traceback.format_exc())
-            print(f"동기화 중 오류 발생: {str(e)}")
+            print(f"Error occurred during sync: {str(e)}")
 
 
 class GitAutoSyncService(win32serviceutil.ServiceFramework):
     _svc_name_ = "GitAutoSyncService"
     _svc_display_name_ = "Git Auto Sync Service"
-    _svc_description_ = "자동으로 Git 저장소를 동기화하는 서비스"
+    _svc_description_ = "Service that automatically syncs Git repository"
 
     def __init__(self, args):
         win32serviceutil.ServiceFramework.__init__(self, args)
@@ -203,32 +204,32 @@ class GitAutoSyncService(win32serviceutil.ServiceFramework):
 #######################################################################
 
     def main(self):
-        repo_path = r"파일 경로"
-        remote_url = "깃허브 주소.git"
-        branch = "깃허브 브랜치"
+        repo_path = r"File Path"
+        remote_url = "GitHub Address.git"
+        branch = "GitHub Branch"
         
 #######################################################################
         try:
             git_sync = GitAutoSync(repo_path, remote_url, branch)
 
-            servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE, 0, ("초기 푸시 시작", ""))
+            servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE, 0, ("Initial push started", ""))
 
             if git_sync.force_push():
-                servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE, 0, ("초기 푸시 완료", ""))
+                servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE, 0, ("Initial push completed", ""))
             else:
-                servicemanager.LogMsg(servicemanager.EVENTLOG_WARNING_TYPE, 0, ("초기 푸시 실패", ""))
+                servicemanager.LogMsg(servicemanager.EVENTLOG_WARNING_TYPE, 0, ("Initial push failed", ""))
 
             schedule.every(10).minutes.do(git_sync.sync)
 
             servicemanager.LogMsg(
                 servicemanager.EVENTLOG_INFORMATION_TYPE,
                 0,
-                (f"Git 자동 동기화가 시작되었습니다. 10분마다 {branch} 브랜치를 동기화합니다.", "")
+                (f"Git auto sync started. Syncing {branch} branch every 10 minutes.", "")
             )
 
             while not self.stop_requested:
                 schedule.run_pending()
-                time.sleep(1)  # 1초마다 스케줄러 확인
+                time.sleep(1)  # Check scheduler every 1 second
                 if win32event.WaitForSingleObject(self.hWaitStop, 1000) == win32event.WAIT_OBJECT_0:
                     break
 
@@ -236,34 +237,34 @@ class GitAutoSyncService(win32serviceutil.ServiceFramework):
             servicemanager.LogMsg(
                 servicemanager.EVENTLOG_ERROR_TYPE,
                 0,
-                (f"서비스 오류: {str(e)}", "")
+                (f"Service error: {str(e)}", "")
             )
 
 def restart_as_background():
-    """새 프로세스로 자신을 재시작하고 현재 프로세스는 3초 후 종료"""
+    """Restart itself as a new process and terminate current process after 3 seconds"""
     script_path = os.path.abspath(sys.argv[0])
     
-    # --from-bat 플래그를 제거하고 --background 플래그 추가
+    # Remove --from-bat flag and add --background flag
     args = [arg for arg in sys.argv[1:] if arg != "--from-bat"]
     if "--background" not in args:
         args.append("--background")
     
-    # 새 프로세스 시작
+    # Start new process
     subprocess.Popen([sys.executable, script_path] + args)
     
-    # 현재 프로세스는 3초 후 종료
-    print("\n프로그램이 백그라운드에서 실행됩니다. 이 창은 3초 후 자동으로 닫힙니다.")
+    # Terminate current process after 3 seconds
+    print("\nProgram will run in background. This window will close automatically in 3 seconds.")
     time.sleep(3)
     sys.exit(0)
 #######################################################################
 
 def run_foreground():
-    repo_path = r"파일 경로"
-    remote_url = "깃허브 주소.git"
-    branch = "깃허브 브랜치"
+    repo_path = r"File Path"
+    remote_url = "GitHub Address.git"
+    branch = "GitHub Branch"
                 
 #######################################################################
-    # bat 파일에서 실행한 경우 백그라운드로 재시작
+    # If executed from bat file, restart in background
     if from_bat and "--background" not in sys.argv:
         restart_as_background()
         return
@@ -272,42 +273,42 @@ def run_foreground():
         git_sync = GitAutoSync(repo_path, remote_url, branch)
         
         print("=" * 50)
-        print("깃 자동 동기화 시작")
+        print("Git Auto Sync Started")
         print("=" * 50)
-        print(f"저장소 경로: {repo_path}")
-        print(f"브랜치: {branch}")
+        print(f"Repository path: {repo_path}")
+        print(f"Branch: {branch}")
         
-        # 초기 푸시 실행
-        print("\n프로그램 시작 시 즉시 푸시 중... (원격 변경사항을 무시하고 로컬 파일만 푸시합니다)")
+        # Execute initial push
+        print("\nExecuting immediate push on program start... (Ignoring remote changes and pushing local files only)")
         if git_sync.force_push():
-            print("초기 푸시 완료!")
+            print("Initial push completed!")
         else:
-            print("초기 푸시 실패. 로그를 확인하세요.")
+            print("Initial push failed. Please check the logs.")
         
-        # 스케줄러 설정
-        print(f"\nGit 자동 동기화가 설정되었습니다. 10분마다 {branch} 브랜치를 동기화합니다.")
-        print("※ 주의: 원격 변경사항을 가져오지 않고 로컬 파일만 푸시합니다.")
-        print("※ 이 창을 닫으면 자동 동기화가 중단됩니다. 창을 계속 열어두세요.")
-        print("\n커맨드창에 'Ctrl+C'를 누르면 프로그램이 종료됩니다.\n")
+        # Setup scheduler
+        print(f"\nGit auto sync has been configured. Syncing {branch} branch every 10 minutes.")
+        print("※ Warning: Does not fetch remote changes, only pushes local files.")
+        print("※ Closing this window will stop auto sync. Keep this window open.")
+        print("\nPress 'Ctrl+C' in the command window to exit the program.\n")
         
-        # 스케줄러 등록
+        # Register scheduler
         schedule.every(10).minutes.do(git_sync.sync)
         
-        # 첫 예약 실행 시간 계산
+        # Calculate first scheduled execution time
         next_run = schedule.next_run()
         if next_run:
-            print(f"다음 동기화 예정 시간: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"Next sync scheduled at: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
         
-        # 무한 루프 실행
+        # Run infinite loop
         try:
             count = 0
-            print("\n프로그램이 실행 중입니다. 10분마다 자동 동기화를 수행합니다...")
+            print("\nProgram is running. Auto sync will be performed every 10 minutes...")
             print("-" * 50)
             
             while True:
                 schedule.run_pending()
                 
-                # 1분마다 한 번씩 로그 출력
+                # Log output every minute
                 if count % 60 == 0 and count > 0:
                     now = datetime.now()
                     next_run = schedule.next_run()
@@ -315,19 +316,19 @@ def run_foreground():
                     
                     minutes = time_left // 60
                     seconds = time_left % 60
-                    print(f"{now.strftime('%Y-%m-%d %H:%M:%S')} - 다음 동기화까지 {minutes}분 {seconds}초 남았습니다.")
+                    print(f"{now.strftime('%Y-%m-%d %H:%M:%S')} - {minutes} minutes {seconds} seconds until next sync.")
                 
                 time.sleep(1)
                 count += 1
                 
         except KeyboardInterrupt:
-            print("\n프로그램을 종료합니다...")
+            print("\nTerminating program...")
             sys.exit(0)
             
     except Exception as e:
-        print(f"\n치명적 오류 발생: {str(e)}")
+        print(f"\nFatal error occurred: {str(e)}")
         print(traceback.format_exc())
-        print("10초 후 프로그램이 종료됩니다...")
+        print("Program will terminate in 10 seconds...")
         time.sleep(10)
         sys.exit(1)
 

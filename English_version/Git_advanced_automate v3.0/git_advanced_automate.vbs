@@ -1,17 +1,17 @@
 ' Git_Advanced_Automate.vbs
-' 백그라운드에서 Git 고급 자동 동기화 시스템 실행
+' Run Git Advanced Auto Sync System in background
 
 Dim WshShell, strCommand, strScriptPath
 
 Set WshShell = CreateObject("WScript.Shell")
 
-' 현재 스크립트 경로 가져오기
+' Get current script path
 strScriptPath = Replace(WScript.ScriptFullName, WScript.ScriptName, "")
 
-' Python 스크립트 경로
+' Python script path
 strCommand = "python """ & strScriptPath & "git_advanced_automate.py"" --background"
 
-' 백그라운드에서 실행 (창 숨김)
+' Run in background (hide window)
 WshShell.Run strCommand, 0, False
 
 Set WshShell = Nothing

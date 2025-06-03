@@ -1,18 +1,18 @@
 # git_advanced_automate.py
 
 """
-Git 고급 자동 동기화 서비스 v3.0
+Git Advanced Auto Sync Service v3.0
 
-새로운 기능:
-✔️ 필요 모듈 자동 설치 (requirements.txt 기반)
-✔️ 자동 merge/rebase 처리
-✔️ 충돌 발생 시 자동으로 에디터 실행
-✔️ 3-way merge와 rebase 상황 자동 감지 및 처리
-✔️ 초기 저장소 설정 완전 자동화 (폴더 생성, clone, init)
-✔️ 원격 변경사항 자동 pull 및 merge
-✔️ 충돌 해결 후 자동 commit/continue
-
-📌 설정 위치: 137-151줄 (CONFIG 섹션)
+New Features:
+✔️ Auto-install required modules (requirements.txt based)
+✔️ Automatic merge/rebase handling
+✔️ Auto-launch editor when conflicts occur
+✔️ 3-way merge and rebase situation auto-detection and handling
+✔️ Complete automation of initial repository setup (folder creation, clone, init)
+✔️ Automatic pull and merge of remote changes
+✔️ Auto commit/continue after conflict resolution
+📌 Configuration Location: Lines 137-151 (CONFIG Section)
+📌 Once you’ve set the path, create a shortcut for the VBS file and place it in the Startup folder so it runs automatically at system startup.
 """
 
 import os
@@ -24,9 +24,9 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-# 필요한 모듈 자동 설치 함수
+# Function to auto-install required modules
 def check_and_install_requirements():
-    """필요한 모듈을 확인하고 자동으로 설치"""
+    """Check and automatically install required modules"""
     required_modules = {
         'git': 'gitpython>=3.1.40',
         'schedule': 'schedule>=1.2.0',
@@ -38,37 +38,37 @@ def check_and_install_requirements():
     
     missing_modules = []
     
-    print("🔍 필요한 모듈을 확인하는 중...")
+    print("🔍 Checking required modules...")
     
-    # 각 모듈 확인
+    # Check each module
     for module, package in required_modules.items():
         try:
             __import__(module)
-            print(f"✅ {module} - 설치됨")
+            print(f"✅ {module} - Installed")
         except ImportError:
-            print(f"❌ {module} - 누락됨")
+            print(f"❌ {module} - Missing")
             if package not in missing_modules:
                 missing_modules.append(package)
     
-    # 누락된 모듈 설치
+    # Install missing modules
     if missing_modules:
-        print(f"\n📦 누락된 모듈을 설치합니다: {', '.join(missing_modules)}")
+        print(f"\n📦 Installing missing modules: {', '.join(missing_modules)}")
         
         for package in missing_modules:
             try:
-                print(f"⬇️ 설치 중: {package}")
+                print(f"⬇️ Installing: {package}")
                 result = subprocess.run([
                     sys.executable, '-m', 'pip', 'install', package
                 ], capture_output=True, text=True, check=True)
                 
-                print(f"✅ {package} 설치 완료")
+                print(f"✅ {package} installation completed")
                 
             except subprocess.CalledProcessError as e:
-                print(f"❌ {package} 설치 실패: {e}")
-                print(f"오류 출력: {e.stderr}")
+                print(f"❌ {package} installation failed: {e}")
+                print(f"Error output: {e.stderr}")
                 
-                # pip 업그레이드 시도
-                print("🔄 pip를 업그레이드하고 다시 시도합니다...")
+                # Try upgrading pip
+                print("🔄 Upgrading pip and retrying...")
                 try:
                     subprocess.run([
                         sys.executable, '-m', 'pip', 'install', '--upgrade', 'pip'
@@ -78,32 +78,32 @@ def check_and_install_requirements():
                         sys.executable, '-m', 'pip', 'install', package
                     ], check=True, capture_output=True)
                     
-                    print(f"✅ {package} 설치 완료 (재시도)")
+                    print(f"✅ {package} installation completed (retry)")
                     
                 except subprocess.CalledProcessError as e2:
-                    print(f"💥 {package} 설치 최종 실패: {e2}")
+                    print(f"💥 {package} final installation failure: {e2}")
                     return False
         
-        print("\n🔄 모듈 설치가 완료되었습니다. 프로그램을 재시작합니다...")
+        print("\n🔄 Module installation completed. Restarting program...")
         time.sleep(2)
         
-        # 프로그램 재시작
+        # Restart program
         subprocess.Popen([sys.executable] + sys.argv)
         sys.exit(0)
     
     else:
-        print("✅ 모든 필요한 모듈이 설치되어 있습니다.\n")
+        print("✅ All required modules are installed.\n")
     
     return True
 
-# requirements.txt 자동 생성
+# Auto-generate requirements.txt
 def create_requirements_file():
-    """requirements.txt 파일 자동 생성"""
+    """Auto-generate requirements.txt file"""
     script_dir = Path(__file__).parent
     requirements_path = script_dir / "requirements.txt"
     
     if not requirements_path.exists():
-        print("📝 requirements.txt 파일을 생성합니다...")
+        print("📝 Creating requirements.txt file...")
         requirements_content = """gitpython>=3.1.40
 schedule>=1.2.0
 pywin32>=306"""
@@ -111,19 +111,19 @@ pywin32>=306"""
         with open(requirements_path, 'w', encoding='utf-8') as f:
             f.write(requirements_content)
         
-        print(f"✅ requirements.txt 파일이 생성되었습니다: {requirements_path}")
+        print(f"✅ requirements.txt file created: {requirements_path}")
 
-# 시작 시 모듈 확인 및 설치
-print("🚀 Git 고급 자동 동기화 시스템 v3.0 시작")
+# Check and install modules at startup
+print("🚀 Git Advanced Auto Sync System v3.0 Starting")
 print("="*60)
 
 create_requirements_file()
 if not check_and_install_requirements():
-    print("💥 필수 모듈 설치에 실패했습니다. 프로그램을 종료합니다.")
-    input("Enter를 눌러 종료하세요...")
+    print("💥 Failed to install required modules. Terminating program.")
+    input("Press Enter to exit...")
     sys.exit(1)
 
-# 이제 모든 모듈이 설치되었으므로 import
+# Now that all modules are installed, import them
 from git import Repo, InvalidGitRepositoryError
 import schedule
 import logging
@@ -136,17 +136,17 @@ import shutil
 
 # ===============================================
 
-# CONFIG 섹션 - 여기만 수정하세요
-REPO_PATH = r"파일경로"  # 로컬 저장소 경로
-REMOTE_URL = "깃허브 주소.git"  # 깃허브 저장소 URL (.git 확장자 포함)
-BRANCH = "브랜치"  # 브랜치명
-SYNC_INTERVAL = 10  # 동기화 간격 (분)
-AUTO_RESOLVE_CONFLICTS = True  # 충돌 시 자동 에디터 실행 여부
+# CONFIG Section - Only modify this section
+REPO_PATH = r"file_path"  # Local repository path
+REMOTE_URL = "github_url.git"  # GitHub repository URL (include .git extension)
+BRANCH = "branch_name"  # Branch name
+SYNC_INTERVAL = 10  # Sync interval (minutes)
+AUTO_RESOLVE_CONFLICTS = True  # Auto-launch editor when conflicts occur
 
-# 커밋 메시지 설정
-COMMIT_MESSAGE_TEMPLATE = "커밋된 시간: {timestamp}"  # {timestamp}는 자동으로 시간으로 대체
-MERGE_MESSAGE_TEMPLATE = "병합한 시간: {timestamp}"  # 병합 커밋 메시지
-CUSTOM_COMMIT_PREFIX = "메세지"  # 커밋 메시지 맨 앞에 나오는 메세지
+# Commit message settings
+COMMIT_MESSAGE_TEMPLATE = "Committed at: {timestamp}"  # {timestamp} will be replaced with time
+MERGE_MESSAGE_TEMPLATE = "Merged at: {timestamp}"  # Merge commit message
+CUSTOM_COMMIT_PREFIX = "Auto-sync"  # Prefix for commit messages
 
 # ===============================================
 
@@ -161,14 +161,14 @@ class GitAdvancedAutoSync:
         self.repo = None
         self.setup_logging()
         
-        # 초기 설정 및 저장소 준비
+        # Initial setup and repository preparation
         self.setup_repository()
 
     def setup_logging(self):
         self.logger = logging.getLogger("GitAdvancedAutoSync")
         self.logger.setLevel(logging.INFO)
 
-        # 로그 디렉터리 생성
+        # Create log directory
         log_dir = self.repo_path.parent if self.repo_path.exists() else Path.cwd()
         log_path = log_dir / "git_advanced_sync.log"
         
@@ -184,39 +184,39 @@ class GitAdvancedAutoSync:
             self.logger.addHandler(console_handler)
 
     def setup_repository(self):
-        """저장소 초기 설정 및 자동화"""
+        """Initial repository setup and automation"""
         try:
-            print(f"저장소 설정 시작: {self.repo_path}")
+            print(f"Repository setup started: {self.repo_path}")
             
-            # 1. 디렉터리 존재 확인 및 생성
+            # 1. Check directory existence and create
             if not self.repo_path.exists():
-                print(f"디렉터리 생성: {self.repo_path}")
+                print(f"Creating directory: {self.repo_path}")
                 self.repo_path.mkdir(parents=True, exist_ok=True)
                 self.logger.info(f"Created directory: {self.repo_path}")
 
-            # 2. Git 저장소 확인 및 초기화
+            # 2. Check Git repository and initialize
             if not (self.repo_path / ".git").exists():
-                print("Git 저장소가 없습니다. 원격 저장소에서 클론을 시도합니다...")
+                print("No Git repository found. Attempting to clone from remote...")
                 
-                # 원격 저장소 클론 시도
+                # Try cloning remote repository
                 if self.clone_repository():
-                    print("원격 저장소 클론 완료!")
+                    print("Remote repository clone completed!")
                 else:
-                    print("클론 실패. 새 저장소를 초기화합니다...")
+                    print("Clone failed. Initializing new repository...")
                     self.init_new_repository()
             else:
-                # 기존 저장소 로드
+                # Load existing repository
                 self.repo = Repo(self.repo_path)
-                print("기존 Git 저장소를 로드했습니다.")
+                print("Existing Git repository loaded.")
                 self.logger.info("Existing repository loaded")
 
-            # 3. 원격 저장소 설정 확인
+            # 3. Check remote repository settings
             self.setup_remote()
             
-            # 4. 브랜치 설정
+            # 4. Branch setup
             self.ensure_branch()
             
-            print("저장소 설정 완료!")
+            print("Repository setup completed!")
             
         except Exception as e:
             self.logger.error(f"Repository setup failed: {str(e)}")
@@ -224,14 +224,14 @@ class GitAdvancedAutoSync:
             raise
 
     def clone_repository(self):
-        """원격 저장소 클론"""
+        """Clone remote repository"""
         try:
-            # 빈 디렉터리인지 확인
+            # Check if directory is empty
             if any(self.repo_path.iterdir()):
-                print("디렉터리가 비어있지 않습니다. 클론을 건너뜁니다.")
+                print("Directory is not empty. Skipping clone.")
                 return False
                 
-            print(f"클론 시작: {self.remote_url}")
+            print(f"Clone started: {self.remote_url}")
             self.repo = Repo.clone_from(self.remote_url, self.repo_path, branch=self.branch)
             self.logger.info(f"Repository cloned from {self.remote_url}")
             return True
@@ -241,17 +241,17 @@ class GitAdvancedAutoSync:
             return False
 
     def init_new_repository(self):
-        """새 저장소 초기화"""
+        """Initialize new repository"""
         try:
-            print("새 Git 저장소 초기화...")
+            print("Initializing new Git repository...")
             self.repo = Repo.init(self.repo_path)
             
-            # README.md 파일 생성
+            # Create README.md file
             readme_path = self.repo_path / "README.md"
             if not readme_path.exists():
                 with open(readme_path, 'w', encoding='utf-8') as f:
-                    f.write(f"# {self.repo_path.name}\n\n자동 생성된 Git 저장소입니다.\n")
-                print("README.md 파일을 생성했습니다.")
+                    f.write(f"# {self.repo_path.name}\n\nAuto-generated Git repository.\n")
+                print("README.md file created.")
             
             self.logger.info("New repository initialized")
             
@@ -260,7 +260,7 @@ class GitAdvancedAutoSync:
             raise
 
     def setup_remote(self):
-        """원격 저장소 설정"""
+        """Setup remote repository"""
         try:
             if "origin" in [remote.name for remote in self.repo.remotes]:
                 origin = self.repo.remote("origin")
@@ -268,17 +268,17 @@ class GitAdvancedAutoSync:
                 if current_url != self.remote_url:
                     origin.set_url(self.remote_url)
                     self.logger.info("Remote URL updated")
-                    print("원격 저장소 URL이 업데이트되었습니다.")
+                    print("Remote repository URL updated.")
             else:
                 self.repo.create_remote("origin", self.remote_url)
                 self.logger.info("Remote 'origin' created")
-                print("원격 저장소 'origin'이 생성되었습니다.")
+                print("Remote 'origin' created.")
                 
         except Exception as e:
             self.logger.error(f"Remote setup failed: {str(e)}")
 
     def ensure_branch(self):
-        """브랜치 확인 및 설정"""
+        """Check and setup branch"""
         try:
             current_branch = self.repo.active_branch.name if self.repo.heads else None
             self.logger.info(f"Current branch: {current_branch}")
@@ -286,10 +286,10 @@ class GitAdvancedAutoSync:
             local_branches = [b.name for b in self.repo.branches]
 
             if self.branch not in local_branches:
-                if self.repo.heads:  # 기존 브랜치가 있는 경우
+                if self.repo.heads:  # If existing branches exist
                     self.logger.info(f"Creating new local branch '{self.branch}'")
                     self.repo.git.checkout("-b", self.branch)
-                else:  # 첫 커밋이 없는 경우
+                else:  # If no initial commit exists
                     self.logger.info(f"Will create branch '{self.branch}' after first commit")
                     
             elif current_branch != self.branch:
@@ -302,20 +302,20 @@ class GitAdvancedAutoSync:
             return False
 
     def is_merge_in_progress(self):
-        """병합이 진행 중인지 확인"""
+        """Check if merge is in progress"""
         merge_head = self.repo_path / ".git" / "MERGE_HEAD"
         return merge_head.exists()
 
     def is_rebase_in_progress(self):
-        """리베이스가 진행 중인지 확인"""
+        """Check if rebase is in progress"""
         rebase_dir = self.repo_path / ".git" / "rebase-merge"
         rebase_apply = self.repo_path / ".git" / "rebase-apply"
         return rebase_dir.exists() or rebase_apply.exists()
 
     def get_conflicted_files(self):
-        """충돌이 발생한 파일 목록 반환"""
+        """Return list of conflicted files"""
         try:
-            # Git status로 충돌 파일 확인
+            # Check conflicted files with Git status
             result = self.repo.git.status("--porcelain")
             conflicted_files = []
             
@@ -330,42 +330,42 @@ class GitAdvancedAutoSync:
             return []
 
     def resolve_conflicts_interactive(self, conflicted_files):
-        """충돌 파일을 대화형으로 해결"""
+        """Resolve conflicted files interactively"""
         if not conflicted_files:
             return True
             
-        print(f"\n충돌이 발생한 파일들: {', '.join(conflicted_files)}")
-        print("충돌 해결을 위해 에디터를 실행합니다...")
+        print(f"\nConflicted files: {', '.join(conflicted_files)}")
+        print("Launching editor for conflict resolution...")
         
         try:
             for file_path in conflicted_files:
                 full_path = self.repo_path / file_path
-                print(f"\n충돌 파일 편집: {file_path}")
-                print("편집기에서 충돌 마커(<<<<<<, ======, >>>>>>)를 제거하고 파일을 저장한 후 종료하세요.")
+                print(f"\nEditing conflicted file: {file_path}")
+                print("Remove conflict markers (<<<<<<, ======, >>>>>>) in the editor, save the file, and exit.")
                 
-                # Git Bash에서 vim으로 파일 편집
-                cmd = f'start "Git Bash" "C:\\Program Files\\Git\\bin\\bash.exe" -c "cd \\"{self.repo_path}\\" && vim \\"{file_path}\\"; read -p \\"편집 완료 후 Enter를 누르세요...\\" "'
+                # Edit file with vim in Git Bash
+                cmd = f'start "Git Bash" "C:\\Program Files\\Git\\bin\\bash.exe" -c "cd \\"{self.repo_path}\\" && vim \\"{file_path}\\"; read -p \\"Press Enter after editing completion...\\" "'
                 
                 try:
                     subprocess.run(cmd, shell=True, check=True)
                     
-                    # 사용자가 편집을 완료했는지 확인
+                    # Confirm user completed editing
                     while True:
-                        user_input = input(f"\n{file_path} 편집을 완료하셨나요? (y/n): ").lower()
+                        user_input = input(f"\nDid you complete editing {file_path}? (y/n): ").lower()
                         if user_input == 'y':
-                            # 파일을 staging area에 추가
+                            # Add file to staging area
                             self.repo.git.add(file_path)
-                            print(f"{file_path} 충돌 해결 완료!")
+                            print(f"{file_path} conflict resolution completed!")
                             break
                         elif user_input == 'n':
-                            print("편집을 다시 시도하세요.")
+                            print("Please try editing again.")
                             subprocess.run(cmd, shell=True, check=True)
                         else:
-                            print("y 또는 n을 입력하세요.")
+                            print("Please enter y or n.")
                             
                 except subprocess.CalledProcessError as e:
                     self.logger.error(f"Editor execution failed: {str(e)}")
-                    print(f"에디터 실행 실패: {file_path}")
+                    print(f"Editor execution failed: {file_path}")
                     return False
                     
             return True
@@ -375,24 +375,24 @@ class GitAdvancedAutoSync:
             return False
 
     def generate_commit_message(self, file_count=0):
-        """커밋 메시지 생성"""
+        """Generate commit message"""
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
-        # 기본 메시지 생성
+        # Generate basic message
         message = COMMIT_MESSAGE_TEMPLATE.format(timestamp=timestamp)
         
-        # 접두사 추가
+        # Add prefix
         if CUSTOM_COMMIT_PREFIX:
             message = f"{CUSTOM_COMMIT_PREFIX} {message}"
         
-        # 파일 개수 추가
+        # Add file count
         if INCLUDE_FILE_COUNT and file_count > 0:
-            message += f" ({file_count}개 파일 변경)"
+            message += f" ({file_count} files changed)"
         
         return message
 
     def generate_merge_message(self):
-        """병합 메시지 생성"""
+        """Generate merge message"""
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         message = MERGE_MESSAGE_TEMPLATE.format(timestamp=timestamp)
         
@@ -400,150 +400,152 @@ class GitAdvancedAutoSync:
             message = f"{CUSTOM_COMMIT_PREFIX} {message}"
         
         return message
-        """병합 또는 리베이스 완료"""
+
+    def complete_merge_or_rebase(self):
+        """Complete merge or rebase"""
         try:
             if self.is_merge_in_progress():
-                # 3-way merge 완료
-                print("3-way merge 완료 중...")
+                # Complete 3-way merge
+                print("Completing 3-way merge...")
                 commit_message = f"Merge completed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 self.repo.git.commit("-m", commit_message)
                 self.logger.info("Merge completed successfully")
-                print("병합이 완료되었습니다!")
+                print("Merge completed!")
                 return True
                 
             elif self.is_rebase_in_progress():
-                # 리베이스 계속
-                print("리베이스 계속 진행 중...")
+                # Continue rebase
+                print("Continuing rebase...")
                 self.repo.git.rebase("--continue")
                 self.logger.info("Rebase continued successfully")
-                print("리베이스가 계속 진행되었습니다!")
+                print("Rebase continued!")
                 return True
                 
             return True
             
         except Exception as e:
             self.logger.error(f"Error completing merge/rebase: {str(e)}")
-            print(f"병합/리베이스 완료 중 오류: {str(e)}")
+            print(f"Error completing merge/rebase: {str(e)}")
             return False
 
     def sync_with_remote(self):
-        """원격 저장소와 동기화"""
+        """Synchronize with remote repository"""
         try:
-            print(f"\n원격 저장소 동기화 시작: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"\nRemote repository sync started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             
-            # 현재 브랜치 확인
+            # Check current branch
             if not self.ensure_branch():
                 return False
 
-            # 로컬 변경사항 커밋
+            # Commit local changes
             self.repo.git.add(".")
             
             if self.repo.is_dirty() or len(self.repo.untracked_files) > 0:
-                # 변경된 파일 개수 계산
+                # Calculate number of changed files
                 file_count = len(self.repo.untracked_files) + len([item.a_path for item in self.repo.index.diff(None)])
                 commit_message = self.generate_commit_message(file_count)
                 self.repo.index.commit(commit_message)
                 self.logger.info(f"Local changes committed: {commit_message}")
-                print(f"로컬 변경사항 커밋: {commit_message}")
+                print(f"Local changes committed: {commit_message}")
 
-            # 원격 저장소에서 변경사항 가져오기
-            print("원격 저장소에서 변경사항을 가져오는 중...")
+            # Fetch changes from remote repository
+            print("Fetching changes from remote repository...")
             try:
                 origin = self.repo.remote("origin")
                 origin.fetch()
                 self.logger.info("Fetched from remote")
                 
-                # 원격 브랜치 존재 확인
+                # Check remote branch existence
                 remote_branch = f"origin/{self.branch}"
                 if remote_branch in [str(ref) for ref in self.repo.refs]:
-                    print(f"원격 브랜치 {remote_branch}와 병합 시도...")
+                    print(f"Attempting to merge with remote branch {remote_branch}...")
                     
                     try:
-                        # 병합 시도
+                        # Attempt merge
                         self.repo.git.merge(remote_branch, "--no-ff")
-                        print("원격 변경사항이 성공적으로 병합되었습니다!")
+                        print("Remote changes merged successfully!")
                         
                     except Exception as merge_error:
                         if "conflict" in str(merge_error).lower():
-                            print("충돌이 발생했습니다!")
+                            print("Conflicts detected!")
                             self.logger.warning("Merge conflict detected")
                             
-                            # 충돌 파일 확인
+                            # Check conflicted files
                             conflicted_files = self.get_conflicted_files()
                             
                             if conflicted_files and AUTO_RESOLVE_CONFLICTS:
-                                print("자동 충돌 해결을 시작합니다...")
+                                print("Starting automatic conflict resolution...")
                                 
                                 if self.resolve_conflicts_interactive(conflicted_files):
-                                    # 충돌 해결 후 병합/리베이스 완료
+                                    # Complete merge/rebase after conflict resolution
                                     if self.complete_merge_or_rebase():
-                                        print("충돌 해결 및 병합이 완료되었습니다!")
+                                        print("Conflict resolution and merge completed!")
                                     else:
-                                        print("병합 완료 중 오류가 발생했습니다.")
+                                        print("Error occurred while completing merge.")
                                         return False
                                 else:
-                                    print("충돌 해결에 실패했습니다.")
+                                    print("Conflict resolution failed.")
                                     return False
                             else:
-                                print("수동으로 충돌을 해결해야 합니다.")
+                                print("Manual conflict resolution required.")
                                 self.logger.error("Manual conflict resolution required")
                                 return False
                         else:
                             raise merge_error
                 else:
-                    print(f"원격 브랜치 {self.branch}가 존재하지 않습니다. 새 브랜치로 푸시합니다.")
+                    print(f"Remote branch {self.branch} does not exist. Pushing as new branch.")
 
-                # 원격으로 푸시
-                print("원격 저장소로 푸시 중...")
+                # Push to remote
+                print("Pushing to remote repository...")
                 push_info = origin.push(self.branch)
                 
                 for info in push_info:
                     self.logger.info(f"Push result: {info.summary}")
-                    print(f"푸시 결과: {info.summary}")
+                    print(f"Push result: {info.summary}")
                 
-                print("동기화가 완료되었습니다!")
+                print("Synchronization completed!")
                 return True
                 
             except Exception as e:
                 self.logger.error(f"Remote sync failed: {str(e)}")
-                print(f"원격 동기화 실패: {str(e)}")
+                print(f"Remote sync failed: {str(e)}")
                 return False
 
         except Exception as e:
             self.logger.error(f"Error during sync: {str(e)}")
-            print(f"동기화 중 오류: {str(e)}")
+            print(f"Error during sync: {str(e)}")
             return False
 
     def sync(self):
-        """스케줄된 동기화 실행"""
+        """Execute scheduled synchronization"""
         try:
             print("\n" + "="*60)
-            print(f"자동 동기화 실행: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"Auto sync execution: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             print("="*60)
             
             success = self.sync_with_remote()
             
             if success:
-                print("✅ 동기화 성공!")
+                print("✅ Sync successful!")
             else:
-                print("❌ 동기화 실패!")
+                print("❌ Sync failed!")
             
-            # 다음 실행 시간 표시
+            # Display next execution time
             next_run = schedule.next_run()
             if next_run:
-                print(f"📅 다음 동기화 예정: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
+                print(f"📅 Next sync scheduled: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
             
             print("="*60)
             
         except Exception as e:
             self.logger.error(f"Scheduled sync failed: {str(e)}")
-            print(f"❌ 스케줄된 동기화 실패: {str(e)}")
+            print(f"❌ Scheduled sync failed: {str(e)}")
 
 
 class GitAdvancedAutoSyncService(win32serviceutil.ServiceFramework):
     _svc_name_ = "GitAdvancedAutoSyncService"
     _svc_display_name_ = "Git Advanced Auto Sync Service"
-    _svc_description_ = "고급 Git 자동 동기화 서비스 (충돌 해결 포함)"
+    _svc_description_ = "Advanced Git Auto Sync Service (includes conflict resolution)"
 
     def __init__(self, args):
         win32serviceutil.ServiceFramework.__init__(self, args)
@@ -571,20 +573,20 @@ class GitAdvancedAutoSyncService(win32serviceutil.ServiceFramework):
             servicemanager.LogMsg(
                 servicemanager.EVENTLOG_INFORMATION_TYPE, 
                 0, 
-                ("초기 동기화 시작", "")
+                ("Initial sync started", "")
             )
 
             if git_sync.sync_with_remote():
                 servicemanager.LogMsg(
                     servicemanager.EVENTLOG_INFORMATION_TYPE, 
                     0, 
-                    ("초기 동기화 완료", "")
+                    ("Initial sync completed", "")
                 )
             else:
                 servicemanager.LogMsg(
                     servicemanager.EVENTLOG_WARNING_TYPE, 
                     0, 
-                    ("초기 동기화 실패", "")
+                    ("Initial sync failed", "")
                 )
 
             schedule.every(SYNC_INTERVAL).minutes.do(git_sync.sync)
@@ -592,7 +594,7 @@ class GitAdvancedAutoSyncService(win32serviceutil.ServiceFramework):
             servicemanager.LogMsg(
                 servicemanager.EVENTLOG_INFORMATION_TYPE,
                 0,
-                (f"Git 고급 자동 동기화 시작. {SYNC_INTERVAL}분마다 {BRANCH} 브랜치를 동기화합니다.", "")
+                (f"Git advanced auto sync started. Syncing {BRANCH} branch every {SYNC_INTERVAL} minutes.", "")
             )
 
             while not self.stop_requested:
@@ -605,11 +607,11 @@ class GitAdvancedAutoSyncService(win32serviceutil.ServiceFramework):
             servicemanager.LogMsg(
                 servicemanager.EVENTLOG_ERROR_TYPE,
                 0,
-                (f"서비스 오류: {str(e)}", "")
+                (f"Service error: {str(e)}", "")
             )
 
 def restart_as_background():
-    """백그라운드로 재시작"""
+    """Restart as background process"""
     script_path = os.path.abspath(sys.argv[0])
     
     args = [arg for arg in sys.argv[1:] if arg != "--from-bat"]
@@ -618,57 +620,57 @@ def restart_as_background():
     
     subprocess.Popen([sys.executable, script_path] + args)
     
-    print("\n프로그램이 백그라운드에서 실행됩니다. 이 창은 3초 후 자동으로 닫힙니다.")
+    print("\nProgram will run in background. This window will close automatically in 3 seconds.")
     time.sleep(3)
     sys.exit(0)
 
 def run_foreground():
-    """포그라운드에서 실행"""
+    """Run in foreground"""
     if from_bat and "--background" not in sys.argv:
         restart_as_background()
         return
     
     try:
-        print("✅ 모든 필수 모듈이 준비되었습니다!")
-        print("🚀 Git 고급 자동 동기화 시스템 v3.0")
+        print("✅ All required modules are ready!")
+        print("🚀 Git Advanced Auto Sync System v3.0")
         print("="*60)
-        print("새로운 기능:")
-        print("✅ 필요 모듈 자동 설치")
-        print("✅ 자동 merge/rebase 처리")
-        print("✅ 충돌 시 자동 에디터 실행")
-        print("✅ 초기 저장소 설정 완전 자동화")
-        print("✅ 원격 변경사항 자동 pull 및 merge")
+        print("New Features:")
+        print("✅ Auto-install required modules")
+        print("✅ Automatic merge/rebase handling")
+        print("✅ Auto-launch editor on conflicts")
+        print("✅ Complete automation of initial repository setup")
+        print("✅ Automatic pull and merge of remote changes")
         print("="*60)
         
         git_sync = GitAdvancedAutoSync(REPO_PATH, REMOTE_URL, BRANCH)
         
-        print(f"\n📁 저장소 경로: {REPO_PATH}")
-        print(f"🌐 원격 저장소: {REMOTE_URL}")
-        print(f"🔀 브랜치: {BRANCH}")
-        print(f"⏰ 동기화 간격: {SYNC_INTERVAL}분")
+        print(f"\n📁 Repository path: {REPO_PATH}")
+        print(f"🌐 Remote repository: {REMOTE_URL}")
+        print(f"🔀 Branch: {BRANCH}")
+        print(f"⏰ Sync interval: {SYNC_INTERVAL} minutes")
         
-        # 초기 동기화 실행
-        print("\n🔄 프로그램 시작 시 즉시 동기화 실행...")
+        # Execute initial sync
+        print("\n🔄 Executing immediate sync at program start...")
         if git_sync.sync_with_remote():
-            print("✅ 초기 동기화 완료!")
+            print("✅ Initial sync completed!")
         else:
-            print("❌ 초기 동기화 실패. 로그를 확인하세요.")
+            print("❌ Initial sync failed. Check logs.")
         
-        # 스케줄러 설정
-        print(f"\n⚙️ 자동 동기화 설정 완료. {SYNC_INTERVAL}분마다 동기화를 수행합니다.")
-        print("💡 충돌 발생 시 자동으로 에디터가 실행됩니다.")
-        print("⚠️ 이 창을 닫으면 자동 동기화가 중단됩니다.")
-        print("\n🛑 종료하려면 'Ctrl+C'를 누르세요.\n")
+        # Setup scheduler
+        print(f"\n⚙️ Auto sync setup completed. Will sync every {SYNC_INTERVAL} minutes.")
+        print("💡 Editor will launch automatically when conflicts occur.")
+        print("⚠️ Closing this window will stop auto sync.")
+        print("\n🛑 Press 'Ctrl+C' to exit.\n")
         
         schedule.every(SYNC_INTERVAL).minutes.do(git_sync.sync)
         
         next_run = schedule.next_run()
         if next_run:
-            print(f"📅 다음 동기화 예정: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"📅 Next sync scheduled: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
         
         try:
             count = 0
-            print("\n🔄 프로그램 실행 중... 자동 동기화 대기 중입니다.")
+            print("\n🔄 Program running... Waiting for auto sync.")
             print("-" * 60)
             
             while True:
@@ -681,19 +683,19 @@ def run_foreground():
                         time_left = int((next_run - now).total_seconds())
                         minutes = time_left // 60
                         seconds = time_left % 60
-                        print(f"{now.strftime('%H:%M:%S')} - ⏰ 다음 동기화까지 {minutes}분 {seconds}초")
+                        print(f"{now.strftime('%H:%M:%S')} - ⏰ {minutes}m {seconds}s until next sync")
                 
                 time.sleep(1)
                 count += 1
                 
         except KeyboardInterrupt:
-            print("\n\n🛑 프로그램을 종료합니다...")
+            print("\n\n🛑 Terminating program...")
             sys.exit(0)
             
     except Exception as e:
-        print(f"\n💥 치명적 오류 발생: {str(e)}")
+        print(f"\n💥 Critical error occurred: {str(e)}")
         print(traceback.format_exc())
-        print("10초 후 프로그램이 종료됩니다...")
+        print("Program will terminate in 10 seconds...")
         time.sleep(10)
         sys.exit(1)
 
