@@ -12,7 +12,7 @@ Git 고급 자동 동기화 서비스 v3.0
 ✔️ 원격 변경사항 자동 pull 및 merge
 ✔️ 충돌 해결 후 자동 commit/continue
 
-📌 설정 위치: 137-148줄 (CONFIG 섹션)
+📌 설정 위치: 137-151줄 (CONFIG 섹션)
 """
 
 import os
@@ -134,6 +134,8 @@ import win32service
 import win32serviceutil
 import shutil
 
+# ===============================================
+
 # CONFIG 섹션 - 여기만 수정하세요
 REPO_PATH = r"파일경로"  # 로컬 저장소 경로
 REMOTE_URL = "깃허브 주소.git"  # 깃허브 저장소 URL (.git 확장자 포함)
@@ -144,9 +146,11 @@ AUTO_RESOLVE_CONFLICTS = True  # 충돌 시 자동 에디터 실행 여부
 # 커밋 메시지 설정
 COMMIT_MESSAGE_TEMPLATE = "커밋된 시간: {timestamp}"  # {timestamp}는 자동으로 시간으로 대체
 MERGE_MESSAGE_TEMPLATE = "병합한 시간: {timestamp}"  # 병합 커밋 메시지
-CUSTOM_COMMIT_PREFIX = "안기부 | "  # 커밋 메시지 앞에 붙일 접두사 (예: "[AUTO]", "[BOT]")
-INCLUDE_FILE_COUNT = True  # 커밋 메시지에 변경된 파일 개수 포함 여부
+CUSTOM_COMMIT_PREFIX = "메세지"  # 커밋 메시지 맨 앞에 나오는 메세지
 
+# ===============================================
+
+INCLUDE_FILE_COUNT = True
 from_bat = "--from-bat" in sys.argv
 
 class GitAdvancedAutoSync:
