@@ -11,9 +11,6 @@
   - 자동 merge/rebase 처리 및 충돌 해결
   - 커밋 메시지 포맷: `자동 커밋: YYYY-MM-DD HH:MM:SS (N개 파일 변경)`
 
-- `Git_Advanced_Automate.bat`  
-  - 프로그램 실행용 배치 파일
-
 - `Git_Advanced_Automate.vbs`  
   - 백그라운드 실행용 (시작프로그램 등록 가능)
 
@@ -101,9 +98,6 @@ Fully automated Git synchronization system that handles code backup, conflict re
   - Main program with automatic module installation
   - Automatic merge/rebase handling and conflict resolution
   - Commit message format: `Auto commit: YYYY-MM-DD HH:MM:SS (N files changed)`
-
-- `Git_Advanced_Automate.bat`  
-  - Batch file for program execution
 
 - `Git_Advanced_Automate.vbs`  
   - Background execution (can be registered in startup programs)
