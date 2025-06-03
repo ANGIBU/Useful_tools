@@ -135,16 +135,16 @@ import win32serviceutil
 import shutil
 
 # CONFIG 섹션 - 여기만 수정하세요
-REPO_PATH = r"파일경로로"  # 로컬 저장소 경로
-REMOTE_URL = "https://github.com/username/repository.git"  # 깃허브 저장소 URL
-BRANCH = "main"  # 브랜치명
+REPO_PATH = r"파일경로"  # 로컬 저장소 경로
+REMOTE_URL = "깃허브 주소.git"  # 깃허브 저장소 URL (.git 확장자 포함)
+BRANCH = "브랜치"  # 브랜치명
 SYNC_INTERVAL = 10  # 동기화 간격 (분)
 AUTO_RESOLVE_CONFLICTS = True  # 충돌 시 자동 에디터 실행 여부
 
 # 커밋 메시지 설정
-COMMIT_MESSAGE_TEMPLATE = "자동 커밋: {timestamp}"  # {timestamp}는 자동으로 시간으로 대체
-MERGE_MESSAGE_TEMPLATE = "자동 병합: {timestamp}"  # 병합 커밋 메시지
-CUSTOM_COMMIT_PREFIX = ""  # 커밋 메시지 앞에 붙일 접두사 (예: "[AUTO]", "[BOT]")
+COMMIT_MESSAGE_TEMPLATE = "커밋된 시간: {timestamp}"  # {timestamp}는 자동으로 시간으로 대체
+MERGE_MESSAGE_TEMPLATE = "병합한 시간: {timestamp}"  # 병합 커밋 메시지
+CUSTOM_COMMIT_PREFIX = "안기부 | "  # 커밋 메시지 앞에 붙일 접두사 (예: "[AUTO]", "[BOT]")
 INCLUDE_FILE_COUNT = True  # 커밋 메시지에 변경된 파일 개수 포함 여부
 
 from_bat = "--from-bat" in sys.argv
