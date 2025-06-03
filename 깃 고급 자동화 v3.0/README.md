@@ -11,10 +11,6 @@
   - 자동 merge/rebase 처리 및 충돌 해결
   - 커밋 메시지 포맷: `자동 커밋: YYYY-MM-DD HH:MM:SS (N개 파일 변경)`
 
-- `Git_Advanced_Automate.bat`  
-  - 프로그램 실행용 배치 파일
-  - Python 모듈 자동 설치 및 실행
-
 - `Git_Advanced_Automate.vbs`  
   - 백그라운드 실행용 (시작프로그램 등록 가능)
 
