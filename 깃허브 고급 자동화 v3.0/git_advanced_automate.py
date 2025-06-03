@@ -12,7 +12,7 @@ Git 고급 자동 동기화 서비스 v3.0
 ✔️ 원격 변경사항 자동 pull 및 merge
 ✔️ 충돌 해결 후 자동 commit/continue
 
-📌 설정 위치: 87-91줄 (CONFIG 섹션)
+📌 설정 위치: 137-148줄 (CONFIG 섹션)
 """
 
 import os
@@ -135,7 +135,7 @@ import win32serviceutil
 import shutil
 
 # CONFIG 섹션 - 여기만 수정하세요
-REPO_PATH = r"C:\MyProject"  # 로컬 저장소 경로
+REPO_PATH = r"파일경로로"  # 로컬 저장소 경로
 REMOTE_URL = "https://github.com/username/repository.git"  # 깃허브 저장소 URL
 BRANCH = "main"  # 브랜치명
 SYNC_INTERVAL = 10  # 동기화 간격 (분)
