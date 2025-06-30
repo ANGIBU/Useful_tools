@@ -1,7 +1,7 @@
 # git_advanced_automate.py
 
 """
-Git 고급 자동 동기화 서비스 v3.0
+Git 고급 자동 동기화 서비스 v3.1
 
 새로운 기능:
 ✔️ 필요 모듈 자동 설치 (requirements.txt 기반)
@@ -11,7 +11,8 @@ Git 고급 자동 동기화 서비스 v3.0
 ✔️ 초기 저장소 설정 완전 자동화 (폴더 생성, clone, init)
 ✔️ 원격 변경사항 자동 pull 및 merge
 ✔️ 충돌 해결 후 자동 commit/continue
-📌 설정 위치: 138-152줄 (CONFIG 섹션)
+✔️ unrelated histories 오류 자동 해결
+📌 설정 위치: 139-157줄 (CONFIG 섹션)
 📌 경로 설정 후 vbs파일에 바로가기 형식을 생성하여 시작프로그램으로 등록하세요
 """
 
@@ -116,7 +117,7 @@ pywin32>=306"""
         print(f"✅ requirements.txt 파일이 생성되었습니다: {requirements_path}")
 
 # 시작 시 모듈 확인 및 설치
-print("🚀 Git 고급 자동 동기화 시스템 v3.0 시작")
+print("🚀 Git 고급 자동 동기화 시스템 v3.1 시작")
 print("="*60)
 
 create_requirements_file()
@@ -144,10 +145,14 @@ BRANCH = "브랜치"  # 브랜치명
 SYNC_INTERVAL = 10  # 동기화 간격 (분)
 AUTO_RESOLVE_CONFLICTS = True  # 충돌 시 자동 에디터 실행 여부
 
+# VS Code 호환 설정
+AUTO_COMMIT = True  # False로 설정하면 VS Code에서 수동 커밋 가능
+VSCODE_COMPATIBLE = False  # True로 설정하면 VS Code 워크플로우 우선
+
 # 커밋 메시지 설정
 COMMIT_MESSAGE_TEMPLATE = "커밋된 시간: {timestamp}"  # {timestamp}는 자동으로 시간으로 대체
 MERGE_MESSAGE_TEMPLATE = "병합한 시간: {timestamp}"  # 병합 커밋 메시지
-CUSTOM_COMMIT_PREFIX = "메세지"  # 커밋 메시지 맨 앞에 나오는 메세지
+CUSTOM_COMMIT_PREFIX = "메세지 | "  # 커밋 메시지 앞에 붙일 접두사 (예: "[AUTO]", "[BOT]")
 
 # ===============================================
 
@@ -406,15 +411,61 @@ class GitAdvancedAutoSync:
             if not self.ensure_branch():
                 return False
 
-            # 로컬 변경사항 커밋
-            self.repo.git.add(".")
-            
-            if self.repo.is_dirty() or len(self.repo.untracked_files) > 0:
-                # 변경된 파일 개수 계산
-                file_count = len(self.repo.untracked_files) + len([item.a_path for item in self.repo.index.diff(None)])
-                commit_message = self.generate_commit_message(file_count)
-                self.repo.index.commit(commit_message)
-                print(f"로컬 변경사항 커밋: {commit_message}")
+            # 진행 중인 병합/리베이스 확인 및 처리
+            if self.is_merge_in_progress():
+                print("⚠️ 진행 중인 병합을 감지했습니다. 자동으로 해결합니다...")
+                conflicted_files = self.get_conflicted_files()
+                
+                if conflicted_files:
+                    print(f"충돌 파일 감지: {', '.join(conflicted_files)}")
+                    if AUTO_RESOLVE_CONFLICTS:
+                        if self.resolve_conflicts_interactive(conflicted_files):
+                            self.complete_merge_or_rebase()
+                        else:
+                            print("충돌 해결 실패. 병합을 중단합니다.")
+                            self.repo.git.merge("--abort")
+                    else:
+                        print("병합을 중단합니다.")
+                        self.repo.git.merge("--abort")
+                else:
+                    # 충돌이 없는 경우 병합 완료
+                    self.complete_merge_or_rebase()
+                    
+            elif self.is_rebase_in_progress():
+                print("⚠️ 진행 중인 리베이스를 감지했습니다. 중단합니다...")
+                self.repo.git.rebase("--abort")
+
+            # VS Code 호환 모드 확인
+            if VSCODE_COMPATIBLE:
+                print("VS Code 호환 모드: 기존 커밋만 동기화합니다.")
+                
+                # staged 변경사항이 있는지 확인
+                if self.repo.index.diff("HEAD"):
+                    print("⚠️ staged 변경사항이 있습니다. VS Code에서 먼저 커밋해주세요.")
+                    return False
+                    
+                # unstaged 변경사항이 있는지 확인  
+                if self.repo.is_dirty():
+                    print("📝 unstaged 변경사항이 있습니다. VS Code에서 작업 후 커밋해주세요.")
+                    print("현재는 기존 커밋만 동기화합니다.")
+                    
+            elif AUTO_COMMIT:
+                # 자동 커밋 모드
+                self.repo.git.add(".")
+                
+                if self.repo.is_dirty() or len(self.repo.untracked_files) > 0:
+                    # 변경된 파일 개수 계산
+                    file_count = len(self.repo.untracked_files) + len([item.a_path for item in self.repo.index.diff(None)])
+                    commit_message = self.generate_commit_message(file_count)
+                    self.repo.index.commit(commit_message)
+                    print(f"로컬 변경사항 커밋: {commit_message}")
+                    
+            else:
+                # 수동 커밋 모드
+                if self.repo.is_dirty() or len(self.repo.untracked_files) > 0:
+                    print("📝 커밋되지 않은 변경사항이 있습니다.")
+                    print("VS Code나 git 명령어로 먼저 커밋해주세요.")
+                    print("현재는 기존 커밋만 동기화합니다.")
 
             # 원격 저장소에서 변경사항 가져오기
             print("원격 저장소에서 변경사항을 가져오는 중...")
@@ -428,13 +479,46 @@ class GitAdvancedAutoSync:
                     print(f"원격 브랜치 {remote_branch}와 병합 시도...")
                     
                     try:
-                        # 병합 시도
+                        # 먼저 일반 병합 시도
                         self.repo.git.merge(remote_branch, "--no-ff")
                         print("원격 변경사항이 성공적으로 병합되었습니다!")
                         
                     except Exception as merge_error:
-                        if "conflict" in str(merge_error).lower():
-                            print("충돌이 발생했습니다!")
+                        error_msg = str(merge_error).lower()
+                        
+                        if "refusing to merge unrelated histories" in error_msg:
+                            print("관련 없는 히스토리 오류 감지. --allow-unrelated-histories 옵션으로 병합을 시도합니다...")
+                            try:
+                                self.repo.git.merge(remote_branch, "--no-ff", "--allow-unrelated-histories")
+                                print("관련 없는 히스토리가 성공적으로 병합되었습니다!")
+                            except Exception as force_merge_error:
+                                if "conflict" in str(force_merge_error).lower():
+                                    print("히스토리 병합 시 충돌이 발생했습니다!")
+                                    
+                                    # 충돌 파일 확인
+                                    conflicted_files = self.get_conflicted_files()
+                                    
+                                    if conflicted_files and AUTO_RESOLVE_CONFLICTS:
+                                        print("자동 충돌 해결을 시작합니다...")
+                                        
+                                        if self.resolve_conflicts_interactive(conflicted_files):
+                                            # 충돌 해결 후 병합/리베이스 완료
+                                            if self.complete_merge_or_rebase():
+                                                print("충돌 해결 및 병합이 완료되었습니다!")
+                                            else:
+                                                print("병합 완료 중 오류가 발생했습니다.")
+                                                return False
+                                        else:
+                                            print("충돌 해결에 실패했습니다.")
+                                            return False
+                                    else:
+                                        print("수동으로 충돌을 해결해야 합니다.")
+                                        return False
+                                else:
+                                    raise force_merge_error
+                                    
+                        elif "conflict" in error_msg:
+                            print("일반 병합에서 충돌이 발생했습니다!")
                             
                             # 충돌 파일 확인
                             conflicted_files = self.get_conflicted_files()
@@ -483,26 +567,17 @@ class GitAdvancedAutoSync:
     def sync(self):
         """스케줄된 동기화 실행"""
         try:
-            print("\n" + "="*60)
-            print(f"자동 동기화 실행: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            print("="*60)
+            print(f"🔄 자동 동기화: {datetime.now().strftime('%H:%M:%S')}")
             
             success = self.sync_with_remote()
             
             if success:
-                print("✅ 동기화 성공!")
+                print("✅ 동기화 완료")
             else:
-                print("❌ 동기화 실패!")
-            
-            # 다음 실행 시간 표시
-            next_run = schedule.next_run()
-            if next_run:
-                print(f"📅 다음 동기화 예정: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
-            
-            print("="*60)
+                print("❌ 동기화 실패")
             
         except Exception as e:
-            print(f"❌ 스케줄된 동기화 실패: {str(e)}")
+            print(f"❌ 동기화 오류: {str(e)}")
 
 
 class GitAdvancedAutoSyncService(win32serviceutil.ServiceFramework):
@@ -565,62 +640,33 @@ def run_foreground():
         return
     
     try:
-        print("✅ 모든 필수 모듈이 준비되었습니다!")
-        print("🚀 Git 고급 자동 동기화 시스템 v3.0")
-        print("="*60)
-        print("새로운 기능:")
-        print("✅ 필요 모듈 자동 설치")
-        print("✅ 자동 merge/rebase 처리")
-        print("✅ 충돌 시 자동 에디터 실행")
-        print("✅ 초기 저장소 설정 완전 자동화")
-        print("✅ 원격 변경사항 자동 pull 및 merge")
-        print("="*60)
+        print("✅ Git 자동 동기화 v3.1 시작")
         
         git_sync = GitAdvancedAutoSync(REPO_PATH, REMOTE_URL, BRANCH)
         
-        print(f"\n📁 저장소 경로: {REPO_PATH}")
-        print(f"🌐 원격 저장소: {REMOTE_URL}")
-        print(f"🔀 브랜치: {BRANCH}")
-        print(f"⏰ 동기화 간격: {SYNC_INTERVAL}분")
+        print(f"📁 {REPO_PATH} | 🌐 {BRANCH} | ⏰ {SYNC_INTERVAL}분")
         
         # 초기 동기화 실행
-        print("\n🔄 프로그램 시작 시 즉시 동기화 실행...")
         if git_sync.sync_with_remote():
-            print("✅ 초기 동기화 완료!")
+            print("✅ 초기 동기화 완료")
         else:
-            print("❌ 초기 동기화 실패.")
+            print("❌ 초기 동기화 실패")
         
         # 스케줄러 설정
-        print(f"\n⚙️ 자동 동기화 설정 완료. {SYNC_INTERVAL}분마다 동기화를 수행합니다.")
-        print("💡 충돌 발생 시 자동으로 에디터가 실행됩니다.")
-        print("⚠️ 이 창을 닫으면 자동 동기화가 중단됩니다.")
-        print("\n🛑 종료하려면 'Ctrl+C'를 누르세요.\n")
-        
         schedule.every(SYNC_INTERVAL).minutes.do(git_sync.sync)
         
         next_run = schedule.next_run()
         if next_run:
-            print(f"📅 다음 동기화 예정: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"📅 다음: {next_run.strftime('%H:%M')}")
+        
+        print("🛑 종료: Ctrl+C")
         
         try:
-            count = 0
-            print("\n🔄 프로그램 실행 중... 자동 동기화 대기 중입니다.")
-            print("-" * 60)
+            print("\n🔄 프로그램 실행 중...")
             
             while True:
                 schedule.run_pending()
-                
-                if count % 60 == 0 and count > 0:
-                    now = datetime.now()
-                    next_run = schedule.next_run()
-                    if next_run:
-                        time_left = int((next_run - now).total_seconds())
-                        minutes = time_left // 60
-                        seconds = time_left % 60
-                        print(f"{now.strftime('%H:%M:%S')} - ⏰ 다음 동기화까지 {minutes}분 {seconds}초")
-                
-                time.sleep(1)
-                count += 1
+                time.sleep(60)  # 1초 대신 60초로 최적화
                 
         except KeyboardInterrupt:
             print("\n\n🛑 프로그램을 종료합니다...")
