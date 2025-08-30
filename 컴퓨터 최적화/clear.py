@@ -1,3 +1,5 @@
+# 컴퓨터 최적화 시스템
+
 import os
 import sys
 import shutil
